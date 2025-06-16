@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { HeaderSection } from "../components/organisms/HeaderSection";
 import { MainContent } from "../components/organisms/MainContent";
-import { CookieConsent } from "../components/molecules/CookieConsent";
 import { parseChatText, convertMessagesToText } from "../utils/chatParser";
 import { message } from "antd";
 import axios from "axios";
@@ -27,6 +26,7 @@ export default function HomePage() {
         message.success(`Parsed ${parsedMessages.length} messages`);
       }
     } catch (error) {
+      console.error("err", error);
       message.error("Could not parse chat messages");
     }
   };
@@ -48,7 +48,8 @@ export default function HomePage() {
         }
         // setInputValue("");
       } catch (error) {
-        message.error("Failed to parse message");
+        console.error("err", error);
+        message.error("Failed to parse message; err: ");
       }
     }
   };
@@ -76,12 +77,9 @@ export default function HomePage() {
       }
 
       // Call your summarization API
-      const summary = await axios.post(
-        `http://127.0.0.1:7860/summarize`,
-        {
-          text: JSON.stringify(textToSummarize),
-        }
-      );
+      const summary = await axios.post(`http://127.0.0.1:7860/summarize`, {
+        text: JSON.stringify(textToSummarize),
+      });
 
       // Set the summary and switch view
       setSummaryText(summary.data?.summary);
@@ -93,22 +91,6 @@ export default function HomePage() {
       setIsSummarizing(false);
     }
   }, [inputValue, chatMessages]);
-
-  // Mock API call - replace with your actual implementation
-  const fetchSummary = async (text: string): Promise<string> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // This would be your actual API response
-        const wordCount = text.split(/\s+/).length;
-        resolve(
-          `Summary (${Math.ceil(wordCount / 10)} words):\n\n"${text.substring(
-            0,
-            150
-          )}${text.length > 150 ? "..." : ""}"`
-        );
-      }, 1500);
-    });
-  };
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
